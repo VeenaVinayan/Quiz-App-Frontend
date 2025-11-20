@@ -7,7 +7,7 @@ interface QuizProps {
   timeLimitMinutes?: number;
 }
 
-const Quiz: React.FC<QuizProps> = ({ questions, timeLimitMinutes = 10 }) => {
+const Quiz: React.FC<QuizProps> = ({ questions, timeLimitMinutes = 4 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [secondsLeft, setSecondsLeft] = useState(timeLimitMinutes * 60);
@@ -38,7 +38,7 @@ const Quiz: React.FC<QuizProps> = ({ questions, timeLimitMinutes = 10 }) => {
 
   const handleSubmit = () => {
     console.log('On submit in Quiz Page !!');
-    navigate('/user/quiz/result',{state:{questions,answers}});
+    navigate('/user/quiz/result',{state:{questions,answers},replace:true});
   };
 
   const formatTime = (sec: number) => {

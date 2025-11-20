@@ -1,4 +1,8 @@
 export const QUESTION ={
-    ADD_QUESTION:'/questions',
-    GET_QUESTIONS:'/questions',
+   QUESTIONS:'question/questions',
+}
+
+export const QUIZ={
+    QUIZ:"/user/quiz",
+    QUIZ_HISTORY :'/user/quiz/history',
 }

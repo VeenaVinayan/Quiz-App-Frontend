@@ -2,20 +2,22 @@ import React, { useState } from "react";
 import adminService from "../../services/adminService";
 import { type  TQuestion } from "../../Types/question.type";
 import { INITIAL_STATE } from "../../constants/question";
-import { Edit, Delete } from "lucide-react";
 import { toast } from 'react-toastify';
 import type { TApiResponse } from "../../Types/general.types";
 import { useNavigate } from 'react-router-dom';
+import { ValidationError } from 'yup';
 
 const QuestionForm: React.FC = () => {
+
   const [question, setQuestion] = useState<TQuestion>(INITIAL_STATE);
   const [questions, setQuestions] = useState<TQuestion[]>([]);
+  const [errors, setErrors ] = useState<Record<string,string>>({});
   const navigate = useNavigate();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     index?: number
-  ) => {
+   ) => {
     const { name, value } = e.target;
 
      if (name.startsWith("option") && typeof index === "number") {
@@ -27,28 +29,37 @@ const QuestionForm: React.FC = () => {
     }
   };
 
-  const handleAddQuestion = () => {
-    if (!question.question || !question.answer) {
-      alert("Question and Answer are required!");
-      return;
-    }
-
+  const handleAddQuestion = async (e: React.FormEvent) => {
+    e.preventDefault();
     const finalQuestion: TQuestion = {
       ...question,
       options: question.type === "T/F" ? ["True", "False"] : question.options,
     };
-
-    setQuestions((prev) => [...prev, finalQuestion]);
-    setQuestion(INITIAL_STATE);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  try{
+        //await schema.validate(question, {abortEarly: false})
+        setQuestions((prev) => [...prev, finalQuestion]);
+        setQuestion(INITIAL_STATE);
+  }catch(err){
+     console.log("Error Validation Error ::",err);
+     if(err instanceof ValidationError){
+        const newErrors : Record<string, string> ={};
+        err.inner.forEach((e) =>{
+           if(e.path){
+              newErrors[e.path] = e.message;
+           }
+        });
+       setErrors(newErrors);
+     }
+  }
+  }  
+ const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (questions.length === 0) {
       alert("Please add at least one question.");
       return;
     }
-
+  
     try {
        console.log("Questions ::",questions);
        const res : TApiResponse<TQuestion> =   await adminService.addQuestion(questions);
@@ -71,8 +82,7 @@ const QuestionForm: React.FC = () => {
       <div className="max-w-3xl mx-auto bg-white shadow-md rounded-lg p-6">
         <h2 className="text-2xl font-bold mb-6">Add Quiz Questions</h2>
 
-        <form className="space-y-4">
-          {/* Question Text */}
+        <form className="space-y-4" onSubmit={handleAddQuestion}>
           <div>
             <label className="block font-medium mb-1">Question</label>
             <input
@@ -81,10 +91,15 @@ const QuestionForm: React.FC = () => {
               value={question.question}
               onChange={handleChange}
               placeholder="Enter question"
+              required
+              minLength={10}
+              maxLength={100}
+              pattern="[A-Za-z?.-0-9]"
             />
+            {errors.question && <p className="text-red-500 font-light text-sm">{errors.question}</p>}
           </div>
-
-          {/* Question Type */}
+          
+          
           <div className="flex items-center gap-6 mb-2">
             <span className="font-medium">Type:</span>
             <label className="flex items-center gap-2">
@@ -107,6 +122,7 @@ const QuestionForm: React.FC = () => {
               />
               Multiple Choice
             </label>
+            {errors.type && <p className="text-red-500 font-light text-sm">{errors.type}</p>}
           </div>
 
           {question.type === "MCQ" &&
@@ -119,7 +135,12 @@ const QuestionForm: React.FC = () => {
                   value={question.options[i] || ""}
                   onChange={(e) => handleChange(e, i)}
                   placeholder={`Option ${i + 1}`}
+                  required
+                  minLength={3}
+                  maxLength={50}
+                  pattern="[A-Za-z0-9,.-]"
                 />
+              {errors.options && <p className="text-red-500 font-light text-sm">{errors.options}</p>}
               </div>
             ))}
 
@@ -132,9 +153,9 @@ const QuestionForm: React.FC = () => {
               onChange={handleChange}
               placeholder="Correct answer"
             />
+            {errors.answer && <p className="text-red-500 font-light text-sm">{errors.answer}</p>}
           </div>
 
-          {/* Score */}
           <div>
             <label className="block font-medium mb-1">Score</label>
             <input
@@ -144,13 +165,17 @@ const QuestionForm: React.FC = () => {
               value={question.score || ""}
               onChange={handleChange}
               placeholder="Question Score"
+              required
+              min="1"
+              max="5"
+
             />
+            {errors.score && <p className="text-red-500 font-light text-sm">{errors.score}</p>}
           </div>
 
           <button
-            type="button"
-            onClick={handleAddQuestion}
-            className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+            type="submit"
+            className="bg-amber-700 text-white py-2 px-4 rounded hover:bg-amber-500"
           >
             Add Question
           </button>
@@ -177,10 +202,10 @@ const QuestionForm: React.FC = () => {
                     <p className="mt-2">Answer: <span className="font-semibold">{q.answer}</span></p>
                     <p>Score: {q.score}</p>
                   </div>
-                  <div className="flex gap-2 mt-2 md:mt-0">
-                    <button><Edit size={20} color="gray" /></button>
+                  {/* <div className="flex gap-2 mt-2 md:mt-0">
+                    <button ><Edit size={20} color="gray" /></button>
                     <button><Delete size={20} color="gray" /></button>
-                  </div>
+                  </div> */}
                 </div>
               ))}
             </div>

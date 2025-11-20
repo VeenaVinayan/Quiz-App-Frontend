@@ -1,20 +1,17 @@
-import React, { type ReactNode, useContext} from 'react';
+import React, { type ReactNode} from 'react';
 
 import { Navigate } from 'react-router-dom';
-import { AuthContext } from '../Context/authContext';
 
 interface ProtectedRouteProps{
      children : ReactNode;
 }
 
-export const ProtectedRoute : React.FC<ProtectedRouteProps> = ({ children}) =>{
-    const context = useContext(AuthContext);
-    if(!context){
-        throw new Error("AuthContext must be used within AuthProvider !");
+const ProtectedRoute : React.FC<ProtectedRouteProps> = ({ children}) =>{
+    const token = localStorage.getItem('accessToken');
+    if(!token){
+        return <Navigate to="/login" replace/>
     }
-    if(!context.isAuthenticated){
-         return<Navigate to="/login" />
-    }
-
-    return<>{children}</>
+    return children;
 }
+
+export default ProtectedRoute;

@@ -5,3 +5,10 @@ export type TQuizResult ={
     incorrectCount : number;
     percentage: number;
 }
+export type TQuiz={
+    id:string;
+    userId:string;
+    score:number;
+    totalScore:number;
+    createdAt:Date;
+}

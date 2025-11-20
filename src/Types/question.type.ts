@@ -16,3 +16,7 @@ export interface IQuestion {
     answer:string;
     score:number;
 }
+export interface IQuestionResult {
+    questions: IQuestion[];
+    totalCount:number;
+}

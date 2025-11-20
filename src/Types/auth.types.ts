@@ -14,6 +14,7 @@ export type TUserData = {
     name:string;
     phone:string;
     email:string;
+    isAdmin:boolean;
 }
 
 export type TLoginResult = {

@@ -1,78 +1,109 @@
 import React, { useEffect, useState } from "react";
 import adminService from "../../services/adminService";
-import type { TApiResponse } from "../../Types/general.types";
-import { type TQuestion } from '../../Types/question.type';
-import { type  IQuestion} from '../../Types/question.type';
-
+import { type  IQuestionResult,type  IQuestion} from '../../Types/question.type';
+import { ArrowRight, ArrowLeft, DeleteIcon , EditIcon } from "lucide-react";
+import {toast } from 'react-toastify';
+import EditQuestionModal from "./QuestionForm";
+import { PER_PAGE } from "../../constants/question";
 const QuestionList: React.FC = () => {
   const [questions, setQuestions] = useState<IQuestion[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editText, setEditText] = useState("");
+  const [edit, setEdit] = useState<IQuestion>();
+  const [page, setPage] = useState<number>(1);
+  const [total, setTotal ] = useState<number>();
+  const [isOpen, setIsOpen ] = useState<boolean>(false);
 
-  const fetchQuestions = async () => {
-     const response : IQuestion[] = await adminService.getQuestions();
-     setQuestions(response);
+  const fetchQuestions = async (page : number) => {
+     const response : IQuestionResult = await adminService.getQuestions(page);
+     setQuestions(response.questions);
+     const totalPages = Math.floor(response.totalCount/PER_PAGE)+1;
+     setTotal(totalPages);
      console.log(response);
   };
     
+  useEffect(() => { fetchQuestions(page) },[page]);
 
- useEffect(() => { fetchQuestions() }, []);
+  const handleDelete = async (id: string) => {
+    const res = await adminService.deleteQuestion(id);
+    if(res){
+        setQuestions((prev) => prev.filter((q) => q.id !== id));
+        toast.success("Question delete Successfully");
+    }else{
+      toast.error("Question delete failed !")
+    }
+  };
 
-//   const handleDelete = async (id: string) => {
-//     await adminService.deleteQuestion(id);
-//     fetchQuestions();
-//   };
+  const handleUpdate = async (question: IQuestion) => {
+     setIsOpen(true);
+     setEdit(question);
+  };
 
-//   const handleUpdate = async (id: string) => {
-//     //await adminService.updateQuestion(id, { question: editText, options: [], correctAnswer: "" });
-//     setEditingId(null);
-//     fetchQuestions();
-//   };
-  
+  const handleEditSave = async(question : IQuestion) =>{
+     const response = await adminService.updateQuestion(question);
+     if(response){
+         setQuestions((prev) =>
+               prev.map((q) => (q.id === question.id ? {...q,...edit} : q ))
+        );
+         toast.success("Question edited successfully");
+     }else{
+         toast.error("Question editing failed ");
+     }
+  }
   return (
     <div className="p-6 bg-white shadow-md rounded-lg mt-6">
       <h3 className="text-xl font-semibold mb-4">All Questions</h3>
       {questions.map((q) => (
         <div key={q.id} className="flex justify-between items-center border-b py-2">
-          {editingId === q.id ? (
-            <input
-              className="border p-2 rounded w-full"
-              value={editText}
-              onChange={(e) => setEditText(e.target.value)}
-            />
-          ) : (
             <p>{q.question}</p>
-          )}
+          
           <div className="flex gap-2">
-            {editingId === q.id ? (
-              <button
-                onClick={() => handleUpdate(q.id!)}
-                className="bg-green-600 text-white px-3 py-1 rounded"
-              >
-                Save
-              </button>
-            ) : (
-              <button
+               <button
                 onClick={() => {
-                  setEditingId(q.id!);
-                  setEditText(q.question);
+                    handleUpdate(q);
                 }}
-                className="bg-yellow-500 text-white px-3 py-1 rounded"
+                className="bg-yellow-700 text-white px-3 py-1 rounded"
               >
-                Edit
+                <EditIcon size={16} />
               </button>
-            )}
-            {/* <button
+            
+            <button
               onClick={() => handleDelete(q.id!)}
-              className="bg-red-600 text-white px-3 py-1 rounded"
+              className="px-3 py-1 rounded bg-amber-900 text-white"
             >
-              Delete
-            </button> */}
+              <DeleteIcon size={16} />
+            </button>
           </div>
         </div>
       ))}
-    </div>
-  );
+      <div className="flex items-center justify-center space-x-3 mt-6">
+  <button
+    onClick={() => setPage(page - 1)}
+    disabled={page === 1}
+    className="px-4 py-2 rounded-full bg-linear-to-r from-amber-700 to-gray-600 text-white hover:from-gray-300 hover:to-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+  >
+    <ArrowLeft size={16} color={'white'} />
+  </button>
+
+  <span className="px-4 py-2 rounded-full bg-amber-800 text-white font-semibold shadow-md">
+    {page}
+  </span>
+
+  <button
+    onClick={() => setPage(page + 1)}
+    disabled={page === total}
+    className="px-4 py-2 rounded-full bg-linear-to-r from-amber-700 to-gray-600 text-white hover:from-gray-600 hover:to-amber-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+  >
+    <ArrowRight size={16} color={'white'} />
+  </button>
+</div>
+<EditQuestionModal
+    isOpen={isOpen}
+    onClose={() => setIsOpen(false)}
+    question={edit}
+    onSave={handleEditSave}
+ />
+</div>
+
+ );
 };
 
 export default QuestionList;

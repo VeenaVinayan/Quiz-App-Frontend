@@ -17,10 +17,10 @@ const Signup: React.FC = () => {
   const onSubmit = async (userSignupData : TUserSignUp) => {
      console.log("Signup data:", userSignupData);
      const res = await authService.userSignUp (userSignupData);
-     if(res === 200){
-         navigate('/login');
+     if(res === 201){
          toast.success('Successfully Signup');
-     }else{
+         navigate('/login');
+      }else{
         toast.error('Signup failed')
      }
   };
