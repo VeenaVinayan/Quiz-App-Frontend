@@ -70,6 +70,9 @@ const Dashboard: React.FC = () => {
             Start Quiz
           </Link>
         </section>
+      {
+        quiz.length > 0 && (
+        <>
         <section className="bg-white shadow-lg rounded-2xl p-6 border border-gray-100">
           <h2 className="text-xl font-semibold text-gray-800 mb-6">
             Quiz Statistics
@@ -92,7 +95,6 @@ const Dashboard: React.FC = () => {
           </div>
         </section>
 
-        {quiz.length > 0 && (
           <section className="bg-white shadow-lg rounded-2xl p-6 border border-gray-100">
             <h2 className="text-2xl font-semibold mb-5 text-gray-800 flex items-center gap-2">
               <span className="w-2 h-6 bg-amber-500 rounded-full"></span>
@@ -131,6 +133,7 @@ const Dashboard: React.FC = () => {
               </table>
             </div>
           </section>
+         </> 
         )}
       </div>
     </div>

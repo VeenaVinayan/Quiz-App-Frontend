@@ -5,9 +5,17 @@ import { ArrowRight, ArrowLeft, DeleteIcon , EditIcon } from "lucide-react";
 import {toast } from 'react-toastify';
 import EditQuestionModal from "./QuestionForm";
 import { PER_PAGE } from "../../constants/question";
+
 const QuestionList: React.FC = () => {
   const [questions, setQuestions] = useState<IQuestion[]>([]);
-  const [edit, setEdit] = useState<IQuestion>();
+  const [edit, setEdit] = useState<IQuestion>({
+    id: "",
+    question: "",
+    type:  "MCQ",
+    options: ["", "", "", ""],
+    answer:'',
+    score:  0,
+});
   const [page, setPage] = useState<number>(1);
   const [total, setTotal ] = useState<number>();
   const [isOpen, setIsOpen ] = useState<boolean>(false);
@@ -95,15 +103,16 @@ const QuestionList: React.FC = () => {
     <ArrowRight size={16} color={'white'} />
   </button>
 </div>
-<EditQuestionModal
+{ isOpen && ( 
+    <EditQuestionModal
     isOpen={isOpen}
     onClose={() => setIsOpen(false)}
     question={edit}
     onSave={handleEditSave}
  />
+)}
+
 </div>
-
- );
+);
 };
-
 export default QuestionList;

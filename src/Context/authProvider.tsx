@@ -8,7 +8,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     id: "",
     name: "",
     phone: "",
-    email: ""
+    email: "",
+    isAdmin:false,
   });
 
   const login = (user: TUserData) => {
@@ -21,7 +22,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem("accessToken");
-    setUserData({ id: "", name: "", phone: "", email: "" });
+    setUserData({ id: "", name: "", phone: "", email: "" , isAdmin:false});
   };
 
   const getUserData = () => userData;

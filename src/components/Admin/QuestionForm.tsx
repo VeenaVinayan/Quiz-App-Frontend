@@ -29,7 +29,7 @@ const EditQuestionModal: React.FC<IProps> = ({
         id: question.id,
         question: question.question,
         type: question.type,
-        options: question.options || ["", "", "", ""],
+        options: question.options || [],
         answer: question.answer,
         score: question.score,
       });
